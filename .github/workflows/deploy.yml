@@ -8,12 +8,16 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
 
       - name: Instalar dependências
-        run: pip install -r requirements.txt
+        run: |
+          python3 -m venv antenv
+          source antenv/bin/activate
+          pip install -r requirements.txt
 
       - name: Criar .env com segredos
         run: |
@@ -22,4 +26,15 @@ jobs:
           echo "BLOB_ACCOUNT_NAME=${{ secrets.BLOB_ACCOUNT_NAME }}" >> .env
           echo "SQL_SERVER=${{ secrets.SQL_SERVER }}" >> .env
           echo "SQL_DATABASE=${{ secrets.SQL_DATABASE }}" >> .env
-          echo
+          echo "SQL_USER=${{ secrets.SQL_USER }}" >> .env
+          echo "SQL_PASSWORD=${{ secrets.SQL_PASSWORD }}" >> .env
+
+      - name: Criar zip (sem ambiente virtual)
+        run: zip release.zip -r ./* -x "antenv/*" ".venv/*" "__pycache__/*"
+
+      - name: Deploy para Azure
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: AzureLAB001Ecommerce
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+          package: release.zip
