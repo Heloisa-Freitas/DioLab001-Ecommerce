@@ -8,23 +8,18 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout código
+      - name: Checkout do código
         uses: actions/checkout@v3
 
       - name: Instalar dependências
         run: pip install -r requirements.txt
 
-      - name: Dar permissão ao startup.sh
-        run: chmod +x startup.sh
-
-      - name: Zipar arquivos para deploy
-        run: zip release.zip ./* -r -x "*.git*" -x "*__pycache__*"
-
-      - name: Fazer deploy para o Azure App Service
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: AzureLAB001Ecommerce
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-          package: release.zip
+      - name: Criar .env com segredos
+        run: |
+          echo "BLOB_CONNECTION_STRING=${{ secrets.BLOB_CONNECTION_STRING }}" >> .env
+          echo "BLOB_CONTAINER_NAME=${{ secrets.BLOB_CONTAINER_NAME }}" >> .env
+          echo "BLOB_ACCOUNT_NAME=${{ secrets.BLOB_ACCOUNT_NAME }}" >> .env
+          echo "SQL_SERVER=${{ secrets.SQL_SERVER }}" >> .env
+          echo "SQL_DATABASE=${{ secrets.SQL_DATABASE }}" >> .env
+          echo

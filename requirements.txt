@@ -1,4 +1,5 @@
 streamlit
 python-dotenv
-azure-storage-blob
+azure-storage-blob==12.14.1
+cryptography==38.0.4
 pymssql
