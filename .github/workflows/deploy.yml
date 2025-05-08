@@ -14,7 +14,7 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Configurar Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -22,7 +22,7 @@ jobs:
       - name: Instalar dependências
         run: pip install -r requirements.txt
 
-      - name: Recriar .env com segredos
+      - name: Criar arquivo .env com segredos
         run: |
           echo "BLOB_CONNECTION_STRING=${{ secrets.BLOB_CONNECTION_STRING }}" >> .env
           echo "BLOB_CONTAINER_NAME=${{ secrets.BLOB_CONTAINER_NAME }}" >> .env
@@ -32,13 +32,12 @@ jobs:
           echo "SQL_USER=${{ secrets.SQL_USER }}" >> .env
           echo "SQL_PASSWORD=${{ secrets.SQL_PASSWORD }}" >> .env
 
-      - name: Zipar o app para deploy
+      - name: Zipar conteúdo para deploy
         run: zip release.zip ./* -r -x "venv/*"
 
-      - name: Publicar no Azure
+      - name: Deploy para Azure App Service
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'AzureLAB001Ecommerce'
-          slot-name: 'production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
           package: release.zip
