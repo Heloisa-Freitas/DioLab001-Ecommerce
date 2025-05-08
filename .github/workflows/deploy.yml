@@ -1,4 +1,4 @@
-name: build-and-deploy
+name: Azure App Deploy
 
 on:
   push:
@@ -10,31 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do código
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-      - name: Instalar dependências
-        run: |
-          python3 -m venv antenv
-          source antenv/bin/activate
-          pip install -r requirements.txt
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
 
-      - name: Criar .env com segredos
-        run: |
-          echo "BLOB_CONNECTION_STRING=${{ secrets.BLOB_CONNECTION_STRING }}" >> .env
-          echo "BLOB_CONTAINER_NAME=${{ secrets.BLOB_CONTAINER_NAME }}" >> .env
-          echo "BLOB_ACCOUNT_NAME=${{ secrets.BLOB_ACCOUNT_NAME }}" >> .env
-          echo "SQL_SERVER=${{ secrets.SQL_SERVER }}" >> .env
-          echo "SQL_DATABASE=${{ secrets.SQL_DATABASE }}" >> .env
-          echo "SQL_USER=${{ secrets.SQL_USER }}" >> .env
-          echo "SQL_PASSWORD=${{ secrets.SQL_PASSWORD }}" >> .env
+    - name: Instalar dependências
+      run: pip install -r requirements.txt
 
-      - name: Criar zip (sem ambiente virtual)
-        run: zip release.zip -r ./* -x "antenv/*" ".venv/*" "__pycache__/*"
+    - name: Permitir execução do startup.sh
+      run: chmod +x startup.sh
 
-      - name: Deploy para Azure
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: AzureLAB001Ecommerce
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-          package: release.zip
+    - name: Zipar app
+      run: zip -r app.zip . -x ".git/*" ".venv/*" "__pycache__/*"
+
+    - name: Deploy para Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: AzureLAB001Ecommerce
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+        package: app.zip
