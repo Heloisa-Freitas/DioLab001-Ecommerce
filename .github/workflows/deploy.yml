@@ -1,4 +1,4 @@
-name: Deploy Streamlit App to Azure Web App - AzureLAB001Ecommerce
+name: Build and deploy to Azure Web App
 
 on:
   push:
@@ -8,18 +8,18 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Clonar repositório
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Instalar dependências
-        run: |
-          python -m venv antenv
-          source antenv/bin/activate
-          pip install -r requirements.txt
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-      - name: Criar .env com segredos
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create .env file
         run: |
           echo "BLOB_CONNECTION_STRING=${{ secrets.BLOB_CONNECTION_STRING }}" >> .env
           echo "BLOB_CONTAINER_NAME=${{ secrets.BLOB_CONTAINER_NAME }}" >> .env
@@ -29,10 +29,10 @@ jobs:
           echo "SQL_USER=${{ secrets.SQL_USER }}" >> .env
           echo "SQL_PASSWORD=${{ secrets.SQL_PASSWORD }}" >> .env
 
-      - name: Zipar arquivos para deploy
-        run: zip release.zip ./* -r -x "venv/*" "__pycache__/*"
+      - name: Zip project
+        run: zip release.zip ./* -r -x "*.git*" -x "venv/*" -x "__pycache__/*"
 
-      - name: Fazer deploy para Azure App Service
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: AzureLAB001Ecommerce
