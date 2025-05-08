@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -19,8 +18,12 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Instalar dependências
-        run: pip install -r requirements.txt
+      - name: Instalar dependências e streamlit no ambiente local
+        run: |
+          python -m venv antenv
+          source antenv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Criar .env com segredos
         run: |
@@ -33,7 +36,8 @@ jobs:
           echo "SQL_PASSWORD=${{ secrets.SQL_PASSWORD }}" >> .env
 
       - name: Zipar arquivos para deploy
-        run: zip release.zip ./* -r -x "venv/*" "__pycache__/*"
+        run: |
+          zip release.zip ./* -r -x "venv/*" "__pycache__/*"
 
       - name: Fazer deploy para Azure App Service
         uses: azure/webapps-deploy@v3

@@ -1,11 +1,8 @@
 #!/bin/bash
+echo "Iniciando startup.sh..."
 
-# Ativar o ambiente virtual (se criado com o GitHub Actions, pode estar em /antenv ou similar)
-if [ -d "venv" ]; then
-    source venv/bin/activate
-elif [ -d "antenv" ]; then
-    source antenv/bin/activate
-fi
+# Ativa o ambiente virtual criado no build
+source antenv/bin/activate
 
-# Executar o app Streamlit
+# Executa o app Streamlit
 streamlit run main.py --server.port=8000 --server.enableCORS=false
