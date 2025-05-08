@@ -1,4 +1,4 @@
-name: Build and deploy to Azure Web App
+name: build-and-deploy
 
 on:
   push:
@@ -8,31 +8,21 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout código
+        uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
+      - name: Instalar dependências
         run: pip install -r requirements.txt
 
-      - name: Create .env file
-        run: |
-          echo "BLOB_CONNECTION_STRING=${{ secrets.BLOB_CONNECTION_STRING }}" >> .env
-          echo "BLOB_CONTAINER_NAME=${{ secrets.BLOB_CONTAINER_NAME }}" >> .env
-          echo "BLOB_ACCOUNT_NAME=${{ secrets.BLOB_ACCOUNT_NAME }}" >> .env
-          echo "SQL_SERVER=${{ secrets.SQL_SERVER }}" >> .env
-          echo "SQL_DATABASE=${{ secrets.SQL_DATABASE }}" >> .env
-          echo "SQL_USER=${{ secrets.SQL_USER }}" >> .env
-          echo "SQL_PASSWORD=${{ secrets.SQL_PASSWORD }}" >> .env
+      - name: Dar permissão ao startup.sh
+        run: chmod +x startup.sh
 
-      - name: Zip project
-        run: zip release.zip ./* -r -x "*.git*" -x "venv/*" -x "__pycache__/*"
+      - name: Zipar arquivos para deploy
+        run: zip release.zip ./* -r -x "*.git*" -x "*__pycache__*"
 
-      - name: Deploy to Azure Web App
+      - name: Fazer deploy para o Azure App Service
         uses: azure/webapps-deploy@v3
         with:
           app-name: AzureLAB001Ecommerce
