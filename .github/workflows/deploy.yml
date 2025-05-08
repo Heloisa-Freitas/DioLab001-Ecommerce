@@ -14,6 +14,13 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
+      - name: Login no Azure com identidade
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -32,12 +39,11 @@ jobs:
           echo "SQL_USER=${{ secrets.SQL_USER }}" >> .env
           echo "SQL_PASSWORD=${{ secrets.SQL_PASSWORD }}" >> .env
 
-      - name: Zipar conteúdo para deploy
-        run: zip release.zip ./* -r -x "venv/*"
+      - name: Zipar arquivos para deploy
+        run: zip release.zip ./* -r -x \"venv/*\" \"__pycache__/*\"
 
-      - name: Deploy para Azure App Service
+      - name: Fazer deploy para Azure App Service
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'AzureLAB001Ecommerce'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+          app-name: AzureLAB001Ecommerce
           package: release.zip
