@@ -1,4 +1,4 @@
-name: build-and-deploy
+name: Deploy Streamlit App to Azure
 
 on:
   push:
@@ -24,15 +24,25 @@ jobs:
       - name: Instalar dependências
         run: pip install -r requirements.txt
 
-      - name: Tornar startup.sh executável
+      - name: Criar arquivo .env com segredos
+        run: |
+          echo "BLOB_CONNECTION_STRING=${{ secrets.BLOB_CONNECTION_STRING }}" >> .env
+          echo "BLOB_CONTAINER_NAME=${{ secrets.BLOB_CONTAINER_NAME }}" >> .env
+          echo "BLOB_ACCOUNT_NAME=${{ secrets.BLOB_ACCOUNT_NAME }}" >> .env
+          echo "SQL_SERVER=${{ secrets.SQL_SERVER }}" >> .env
+          echo "SQL_DATABASE=${{ secrets.SQL_DATABASE }}" >> .env
+          echo "SQL_USER=${{ secrets.SQL_USER }}" >> .env
+          echo "SQL_PASSWORD=${{ secrets.SQL_PASSWORD }}" >> .env
+
+      - name: Garantir permissão para startup.sh
         run: chmod +x startup.sh
 
-      - name: Zipar conteúdo para deploy
-        run: zip -r app.zip . -x ".venv/*" ".git/*" "__pycache__/*"
+      - name: Zipar arquivos para deploy
+        run: zip release.zip ./* -r -x "venv/*" "__pycache__/*"
 
-      - name: Deploy para Azure Web App
+      - name: Fazer deploy para Azure App Service
         uses: azure/webapps-deploy@v3
         with:
           app-name: AzureLAB001Ecommerce
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-          package: app.zip
+          package: release.zip
