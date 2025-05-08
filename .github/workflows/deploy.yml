@@ -10,19 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do código
+      - name: Clonar repositório
         uses: actions/checkout@v4
 
-      - name: Configurar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Instalar dependências e streamlit no ambiente local
+      - name: Instalar dependências
         run: |
           python -m venv antenv
           source antenv/bin/activate
-          pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Criar .env com segredos
@@ -36,8 +30,7 @@ jobs:
           echo "SQL_PASSWORD=${{ secrets.SQL_PASSWORD }}" >> .env
 
       - name: Zipar arquivos para deploy
-        run: |
-          zip release.zip ./* -r -x "venv/*" "__pycache__/*"
+        run: zip release.zip ./* -r -x "venv/*" "__pycache__/*"
 
       - name: Fazer deploy para Azure App Service
         uses: azure/webapps-deploy@v3
