@@ -107,6 +107,10 @@ App Service
 Deploy no App Service
 ![Screenshot 2025-05-09 104801](https://github.com/user-attachments/assets/422f1a11-4fdb-4cef-ac7b-027a6920df02)
 
+Aplicacao no Browser
+![Screenshot 2025-05-09 100450](https://github.com/user-attachments/assets/1bc24f41-be07-4225-8157-625e4e5a3933)
+
+
 
 
 
